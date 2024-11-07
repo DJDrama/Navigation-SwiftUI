@@ -10,11 +10,14 @@ import SwiftUI
 @main
 struct __ProgrammaticNavigationUsingEnumsApp: App {
     
-    @State private var router = Router()
+    //@State private var router = Router()
+    
+    @State private var routes: [Route] = []
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $router.routes) {
+            // NavigationStack(path: $router.routes) {
+            NavigationStack(path: $routes) {
                 ContentView()
                     .navigationDestination(for: Route.self) { route in
                         switch route {
@@ -31,7 +34,22 @@ struct __ProgrammaticNavigationUsingEnumsApp: App {
                             
                         }
                     }
-            }.environment(router)
+            }
+            //.environment(router)
+            .environment(\.navigate, NavigateAction(action: performNavigation))
         }
+    }
+    
+    private func performNavigation(_ navigationType: NavigationType){
+        switch navigationType {
+        case .push(let route):
+            routes.append(route)
+        case .unwind(let route):
+            guard let index = routes.firstIndex(where: {$0 == route}) else { return }
+            routes = Array(routes.prefix(upTo: index + 1))
+        case .popToRoot:
+            routes = []
+        }
+        
     }
 }
